@@ -17,6 +17,6 @@ def start(message):
     markup.add(btn)
     bot.send_message(message.chat.id, "Бот готов! Жми кнопку:", reply_markup=markup)
 
-if name == 'main':
+if __name__ == '__main__':
     print("Бот запущен...")
     bot.infinity_polling()
