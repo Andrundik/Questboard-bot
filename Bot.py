@@ -7,7 +7,7 @@ TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 
 # Сюда позже вставим ссылку на твой Mini App
-WEB_APP_URL = 'https://твоя-ссылка.replit.app'
+WEB_APP_URL = 'andrundik.github.io.'
 
 @bot.message_handler(commands=['start'])
 def start(message):
