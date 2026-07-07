@@ -1,13 +1,29 @@
 import os
 import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from flask import Flask
+import threading
 
-# Берем токен из настроек Render, чтобы он был в безопасности
+# --- Настройка веб-сервера для Render (чтобы бот не падал) ---
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Бот работает!"
+
+def run():
+    app.run(host='0.0.0.0', port=10000)
+
+# Запускаем веб-сервер в отдельном потоке
+threading.Thread(target=run).start()
+# -------------------------------------------------------------
+
+# Берем токен из настроек Render
 TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 
-# Сюда позже вставим ссылку на твой Mini App
-WEB_APP_URL = andrundik.github.io.
+# Ссылка на твой Mini App на GitHub Pages (ОБЯЗАТЕЛЬНО В КАВЫЧКАХ)
+WEB_APP_URL = 'https://andrundik.github.io/Questboard-bot/'
 
 @bot.message_handler(commands=['start'])
 def start(message):
