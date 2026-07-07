@@ -35,6 +35,7 @@ def start(message):
 
 if __name__ == '__main__':
     print("Бот запущен...")
+    
     bot.infinity_polling()
 # Важно! Этот код должен быть в твоем Bot.py
 @bot.message_handler(content_types=['web_app_data'])

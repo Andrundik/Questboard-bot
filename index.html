@@ -4,31 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quest Board</title>
-    <!-- Подключаем Telegram Web Apps SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
+        /* Стили, которые мы добавили */
+        body { font-family: sans-serif; background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); padding: 20px; text-align: center; }
+        .quest-card { background-color: var(--tg-theme-secondary-bg-color); padding: 15px; margin: 10px 0; border-radius: 12px; }
+        button { background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
     </style>
 </head>
 <body>
     <h1>Quest Board</h1>
-    
-    <button onclick="sendQuest('Квест: Собрать 10 монет')">Собрать 10 монет</button>
-    <button onclick="sendQuest('Квест: Посетить магазин')">Посетить магазин</button>
 
-<script>
-    let tg = window.Telegram.WebApp;
-    tg.ready();
+    <div class="quest-card">
+        <h3>💰 Сбор монет</h3>
+        <p>Собери 10 монет в лесу</p>
+        <button onclick="sendQuest('Квест: Собрать монеты')">Выполнить</button>
+    </div>
 
-    function sendQuest(questName) {
-        alert("Кнопка нажата: " + questName); // Это сработает сразу в браузере
-        tg.sendData(questName); // Это отправит данные боту
-    }
-</script>
+    <div class="quest-card">
+        <h3>⚔️ Охота на монстра</h3>
+        <p>Победи пещерного тролля</p>
+        <button onclick="sendQuest('Квест: Охота на тролля')">Выполнить</button>
+    </div>
+
+    <script>
+        function sendQuest(questName) {
+            let tg = window.Telegram.WebApp;
+            tg.sendData(questName);
+        }
+    </script>
 </body>
 </html>
