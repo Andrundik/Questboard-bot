@@ -18,5 +18,18 @@
 <body>
     <h1>Привет, это QuestBoard!</h1>
     <p>Создатель этого чуда @andrundik1.</p>
+    <button id=""maibutton">Просто кнопка</button>
+    const btn = document.getElementByld("MainButton");
+    btn.addEventListener('click',() => {
+        alert('@ggnrt лох');
+    })
+    <script>
+        let tg = window.telegram.webApp;
+        tg.mainbutton.text = 'Просто кнопка'
+        tg.mainbutton.show();
+        tg.onEvent('mainbuttonClicked',function(){
+            tgsenddata('лошок попался');
+        })
+    </script>
 </body>
 </html>
