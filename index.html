@@ -21,11 +21,14 @@
     <button onclick="sendQuest('Квест: Собрать 10 монет')">Собрать 10 монет</button>
     <button onclick="sendQuest('Квест: Посетить магазин')">Посетить магазин</button>
 
-    <script>
-        function sendQuest(questName) {
-            let tg = window.Telegram.WebApp;
-            tg.sendData(questName);
-        }
-    </script>
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.ready();
+
+    function sendQuest(questName) {
+        alert("Кнопка нажата: " + questName); // Это сработает сразу в браузере
+        tg.sendData(questName); // Это отправит данные боту
+    }
+</script>
 </body>
 </html>

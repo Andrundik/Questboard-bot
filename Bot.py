@@ -36,8 +36,8 @@ def start(message):
 if __name__ == '__main__':
     print("Бот запущен...")
     bot.infinity_polling()
-    # Этот блок кода отвечает за получение данных из Mini App
+# Важно! Этот код должен быть в твоем Bot.py
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app_data(message):
-    quest_data = message.web_app_data.data
-    bot.send_message(message.chat.id, f"Принято! {quest_data} — я зафиксировал выполнение.")
+    data = message.web_app_data.data
+    bot.send_message(message.chat.id, f"Бот получил: {data}")
