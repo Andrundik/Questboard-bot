@@ -26,12 +26,17 @@
         <p>Победи пещерного тролля</p>
         <button onclick="sendQuest('Квест: Охота на тролля')">Выполнить</button>
     </div>
-
-    <script>
-        function sendQuest(questName) {
+<script>
+    function sendQuest(questName) {
+        // Добавим проверку, чтобы понять, видит ли скрипт Telegram
+        if (window.Telegram && window.Telegram.WebApp) {
             let tg = window.Telegram.WebApp;
             tg.sendData(questName);
+            alert("Отправляю: " + questName); // Убери это, когда заработает
+        } else {
+            alert("Ошибка: Telegram WebApp не найден!");
         }
-    </script>
+    }
+</script>
 </body>
 </html>
