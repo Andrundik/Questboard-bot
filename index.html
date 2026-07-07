@@ -16,22 +16,16 @@
     </style>
 </head>
 <body>
-    <h1>Привет, это QuestBoard!</h1>
-    <p>Создатель этого чуда @andrundik1.</p>
+    <h1>Quest Board</h1>
     
-    <button id="mainbutton">Просто кнопка</button>
-    <script>
-        const btn = document.getElementById("mainbutton");
-        btn.addEventListener('click',() => {
-        alert('@ggnrt лох');
-        })
+    <button onclick="sendQuest('Квест: Собрать 10 монет')">Собрать 10 монет</button>
+    <button onclick="sendQuest('Квест: Посетить магазин')">Посетить магазин</button>
 
-        let tg = window.Telegram.webApp;
-        tg.mainbutton.text = 'Просто кнопка'
-        tg.mainbutton.show();
-        tg.onEvent('mainbuttonClicked',function(){
-            tg.sendData('лошок попался');
-        })
+    <script>
+        function sendQuest(questName) {
+            let tg = window.Telegram.WebApp;
+            tg.sendData(questName);
+        }
     </script>
 </body>
 </html>
