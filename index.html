@@ -112,7 +112,7 @@
             overflow: hidden;
         }
 
-        /* Фикс аватарок (теперь они круглые и не сплющиваются) */
+        /* Аватарки */
         .quest-avatar {
             width: 36px;
             height: 36px;
@@ -190,7 +190,7 @@
     <!-- Квесты -->
     <div class="section-title">📌 Подписаться на каналы</div>
     <div class="quests-container">
-        <div class="quest-item" onclick="openChannel('https://t.me/durov', 'Крипто Новости UA')">
+        <div class="quest-item" onclick="completeQuest('https://t.me/durov', 'Крипто Новости UA')">
             <div class="quest-info">
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
                 <div class="quest-title">Крипто Новости UA</div>
@@ -198,7 +198,7 @@
             <div class="quest-reward">+1 🎟</div>
         </div>
 
-        <div class="quest-item" onclick="openChannel('https://t.me/durov', 'Геймеры Telegram')">
+        <div class="quest-item" onclick="completeQuest('https://t.me/durov', 'Геймеры Telegram')">
             <div class="quest-info">
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
                 <div class="quest-title">Геймеры Telegram</div>
@@ -206,7 +206,7 @@
             <div class="quest-reward">+2 🎟</div>
         </div>
 
-        <div class="quest-item" onclick="openChannel('https://t.me/durov', 'Раздача TON')">
+        <div class="quest-item" onclick="completeQuest('https://t.me/durov', 'Раздача TON')">
             <div class="quest-info">
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
                 <div class="quest-title">Раздача TON</div>
@@ -226,17 +226,18 @@
         let tg = window.Telegram.WebApp;
         tg.ready();
 
-        function openChannel(url, channelName) {
-            // Открываем канал в Telegram без закрытия мини-приложения (или с помощью встроенного метода)
+        function completeQuest(channelUrl, questName) {
             if (window.Telegram && window.Telegram.WebApp) {
-                tg.openTelegramLink(url);
+                // Открываем канал для подписки
+                tg.openTelegramLink(channelUrl);
+                // Тихо отправляем боту сигнал на проверку подписки
+                tg.sendData('CHECK_SUB:' + questName);
             } else {
-                window.open(url, '_blank');
+                window.open(channelUrl, '_blank');
             }
         }
 
         function buyUpgrade(name) {
-            // Убрали назойливые alert, теперь просто логика покупки
             console.log("Покупка: " + name);
         }
 
