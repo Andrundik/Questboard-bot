@@ -20,7 +20,7 @@
 
         h1 {
             text-align: center;
-            font-size: 24px;
+            font-size: 22px;
             margin-bottom: 15px;
         }
 
@@ -31,57 +31,91 @@
             border-radius: 16px;
             text-align: center;
             font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* Центральная зона (Колесо) */
+        .wheel-container {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            height: 140px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Кнопки улучшений */
+        .upgrades-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 20px;
+        }
+
+        .upgrade-card {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 12px;
+            border-radius: 14px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .upgrade-card div:first-child {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upgrade-card div:last-child {
+            font-size: 12px;
+            opacity: 0.7;
         }
 
         /* Заголовки разделов */
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             margin-bottom: 10px;
             text-align: left;
         }
 
-        /* Контейнер для списка квестов с прокруткой */
+        /* Секция квестов (вертикальный скролл) */
         .quests-container {
-            max-height: 320px;
+            max-height: 220px;
             overflow-y: auto;
             display: flex;
-            flex-direction: data;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding-right: 5px;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
         }
 
-        /* Карточка отдельного квеста */
+        /* Карточка квеста */
         .quest-item {
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 12px;
+            padding: 10px 12px;
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
             cursor: pointer;
-            transition: transform 0.1s;
         }
 
-        .quest-item:active {
-            transform: scale(0.98);
-        }
-
-        /* Левая часть: аватарка и название */
         .quest-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-grow: 1;
             overflow: hidden;
         }
 
+        /* Фикс аватарок (теперь они круглые и не сплющиваются) */
         .quest-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background-color: #ccc;
             object-fit: cover;
@@ -89,20 +123,19 @@
         }
 
         .quest-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Правая часть: награда */
         .quest-reward {
             background-color: var(--tg-theme-button-color, #ff6600);
             color: var(--tg-theme-button-text-color, #ffffff);
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             white-space: nowrap;
         }
@@ -123,7 +156,7 @@
         }
 
         .tab-item {
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
         }
     </style>
@@ -132,17 +165,32 @@
 
     <h1>Quest Board</h1>
 
-    <!-- Блок баланса -->
+    <!-- Баланс -->
     <div class="tickets-card">
         🎟 Билетов: <span id="tickets-count">0</span>
     </div>
 
-    <!-- Секция квестов -->
+    <!-- Колесо -->
+    <div class="wheel-container">
+        🎡 Колесо фортуны
+    </div>
+
+    <!-- Улучшения -->
+    <div class="upgrades-grid">
+        <div class="upgrade-card" onclick="buyUpgrade('Убрать рекламу')">
+            <div>Убрать рекламу</div>
+            <div>50 🪙</div>
+        </div>
+        <div class="upgrade-card" onclick="buyUpgrade('Быстрые крутки')">
+            <div>Быстрые крутки</div>
+            <div>25 🪙</div>
+        </div>
+    </div>
+
+    <!-- Квесты -->
     <div class="section-title">📌 Подписаться на каналы</div>
     <div class="quests-container">
-        
-        <!-- Квест 1 -->
-        <div class="quest-item" onclick="startQuest('Канал А', 'sub')">
+        <div class="quest-item" onclick="openChannel('https://t.me/durov', 'Крипто Новости UA')">
             <div class="quest-info">
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
                 <div class="quest-title">Крипто Новости UA</div>
@@ -150,8 +198,7 @@
             <div class="quest-reward">+1 🎟</div>
         </div>
 
-        <!-- Квест 2 -->
-        <div class="quest-item" onclick="startQuest('Канал Б', 'sub')">
+        <div class="quest-item" onclick="openChannel('https://t.me/durov', 'Геймеры Telegram')">
             <div class="quest-info">
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
                 <div class="quest-title">Геймеры Telegram</div>
@@ -159,24 +206,13 @@
             <div class="quest-reward">+2 🎟</div>
         </div>
 
-        <!-- Квест 3 -->
-        <div class="quest-item" onclick="startQuest('Канал В', 'sub')">
+        <div class="quest-item" onclick="openChannel('https://t.me/durov', 'Раздача TON')">
             <div class="quest-info">
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
                 <div class="quest-title">Раздача TON</div>
             </div>
             <div class="quest-reward">+1 🎟</div>
         </div>
-
-        <!-- Квест 4 (для проверки скролла вниз) -->
-        <div class="quest-item" onclick="startQuest('Канал Г', 'sub')">
-            <div class="quest-info">
-                <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
-                <div class="quest-title">Мемы и Аниме</div>
-            </div>
-            <div class="quest-reward">+1 🎟</div>
-        </div>
-
     </div>
 
     <!-- Нижнее меню -->
@@ -190,15 +226,22 @@
         let tg = window.Telegram.WebApp;
         tg.ready();
 
-        function startQuest(questName, type) {
+        function openChannel(url, channelName) {
+            // Открываем канал в Telegram без закрытия мини-приложения (или с помощью встроенного метода)
             if (window.Telegram && window.Telegram.WebApp) {
-                tg.sendData('Квест: ' + questName);
+                tg.openTelegramLink(url);
+            } else {
+                window.open(url, '_blank');
             }
-            alert('Выбран квест: ' + questName);
+        }
+
+        function buyUpgrade(name) {
+            // Убрали назойливые alert, теперь просто логика покупки
+            console.log("Покупка: " + name);
         }
 
         function switchTab(tab) {
-            alert('Переход на вкладку: ' + tab);
+            console.log("Вкладка: " + tab);
         }
     </script>
 </body>
