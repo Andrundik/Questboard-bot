@@ -1,44 +1,60 @@
-import os
 import telebot
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
-from flask import Flask
-import threading
+from telebot import types
 
-# --- Настройка веб-сервера для Render (чтобы бот не падал) ---
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Бот работает!"
-
-def run():
-    app.run(host='0.0.0.0', port=10000)
-
-# Запускаем веб-сервер в отдельном потоке
-threading.Thread(target=run).start()
-# -------------------------------------------------------------
-
-# Берем токен из настроек Render
-TOKEN = os.environ.get('BOT_TOKEN')
+# Твой токен бота
+TOKEN = "8612175069:AAG9QLEDHoHdYf5_vZEAkUHCkXDGq1y_JKU"
 bot = telebot.TeleBot(TOKEN)
 
-# Ссылка на твой Mini App на GitHub Pages (ОБЯЗАТЕЛЬНО В КАВЫЧКАХ)
-WEB_APP_URL = 'https://andrundik.github.io/Questboard-bot/'
+# ID или юзернейм канала (бот должен быть там администратором!)
+CHANNEL_ID = "@Questboardrobot" 
+
+# Словарь для хранения баланса билетов пользователей
+user_tickets = {}
 
 @bot.message_handler(commands=['start'])
-def start(message):
-    markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    web_app = WebAppInfo(url=WEB_APP_URL)
-    btn = KeyboardButton(text="🚀 Открыть Quest Board", web_app=web_app)
-    markup.add(btn)
-    bot.send_message(message.chat.id, "Бот готов! Жми кнопку:", reply_markup=markup)
-
-if __name__ == '__main__':
-    print("Бот запущен...")
+def start_message(message):
+    user_id = message.chat.id
     
-    bot.infinity_polling()
-# Важно! Этот код должен быть в твоем Bot.py
+    # Создаем кнопку для открытия Mini App
+    markup = types.InlineKeyboardMarkup()
+    web_app = types.WebAppInfo(url="ССЫЛКА_НА_ТВОЙ_САЙТ_НА_RENDER")
+    markup.add(types.InlineKeyboardButton("🚀 Открыть Quest Board", web_app=web_app))
+    
+    bot.send_message(user_id, "Привет! Добро пожаловать в Quest Board. Выполняй квесты и получай билеты!", reply_markup=markup)
+
+# Обработка данных, прилетающих из Mini App без лишнего шума
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app_data(message):
+    user_id = message.from_user.id
     data = message.web_app_data.data
-    bot.send_message(message.chat.id, f"Бот получил: {data}")
+    
+    # Проверяем запрос на выполнение квеста
+    if data.startswith("CHECK_SUB:"):
+        quest_name = data.split(":")[1]
+        
+        try:
+            # Проверяем статус подписки пользователя в канале
+            chat_member = bot.get_chat_member(CHANNEL_ID, user_id)
+            status = chat_member.status
+            
+            if status in ['member', 'administrator', 'creator']:
+                # Начисляем билет
+                if user_id not in user_tickets:
+                    user_tickets[user_id] = 0
+                user_tickets[user_id] += 1
+                
+                bot.send_message(
+                    user_id, 
+                    f"✅ Подписка на «{quest_name}» подтверждена!\n🎟 Тебе начислен 1 билет. Всего билетов: {user_tickets[user_id]}"
+                )
+            else:
+                bot.send_message(
+                    user_id, 
+                    f"❌ Ты еще не подписался на канал «{quest_name}». Подпишись и нажми на квест снова!"
+                )
+        except Exception as e:
+            bot.send_message(user_id, "⚠️ Ошибка проверки подписки. Убедись, что бот назначен администратором в канале.")
+
+# Запуск бота
+print("Бот запущен...")
+bot.infinity_polling()
