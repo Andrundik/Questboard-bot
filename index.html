@@ -6,46 +6,200 @@
     <title>Quest Board</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Стили, которые мы добавили */
-        body { font-family: sans-serif; background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); padding: 20px; text-align: center; }
-        .quest-card { background-color: var(--tg-theme-secondary-bg-color); padding: 15px; margin: 10px 0; border-radius: 12px; }
-        button { background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
         body {
-    max-width: 500px; /* Сайт будет шириной как телефон */
-    margin: 0 auto;   /* Центрируем сайт по экрану */
-    font-family: sans-serif;
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    padding: 20px;
-    text-align: center;
-}
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-family: sans-serif;
+            margin: 0;
+            padding: 15px 15px 80px 15px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        /* Блок билетов */
+        .tickets-card {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 12px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Заголовки разделов */
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        /* Контейнер для списка квестов с прокруткой */
+        .quests-container {
+            max-height: 320px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: data;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-right: 5px;
+        }
+
+        /* Карточка отдельного квеста */
+        .quest-item {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 12px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .quest-item:active {
+            transform: scale(0.98);
+        }
+
+        /* Левая часть: аватарка и название */
+        .quest-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .quest-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ccc;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .quest-title {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Правая часть: награда */
+        .quest-reward {
+            background-color: var(--tg-theme-button-color, #ff6600);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* Нижнее меню */
+        .tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            border-top: 1px solid rgba(128, 128, 128, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .tab-item {
+            font-size: 24px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+
     <h1>Quest Board</h1>
 
-    <div class="quest-card">
-        <h3>💰 Сбор монет</h3>
-        <p>Собери 10 монет в лесу</p>
-        <button onclick="sendQuest('Квест: Собрать монеты')">Выполнить</button>
+    <!-- Блок баланса -->
+    <div class="tickets-card">
+        🎟 Билетов: <span id="tickets-count">0</span>
     </div>
 
-    <div class="quest-card">
-        <h3>⚔️ Охота на монстра</h3>
-        <p>Победи пещерного тролля</p>
-        <button onclick="sendQuest('Квест: Охота на тролля')">Выполнить</button>
+    <!-- Секция квестов -->
+    <div class="section-title">📌 Подписаться на каналы</div>
+    <div class="quests-container">
+        
+        <!-- Квест 1 -->
+        <div class="quest-item" onclick="startQuest('Канал А', 'sub')">
+            <div class="quest-info">
+                <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
+                <div class="quest-title">Крипто Новости UA</div>
+            </div>
+            <div class="quest-reward">+1 🎟</div>
+        </div>
+
+        <!-- Квест 2 -->
+        <div class="quest-item" onclick="startQuest('Канал Б', 'sub')">
+            <div class="quest-info">
+                <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
+                <div class="quest-title">Геймеры Telegram</div>
+            </div>
+            <div class="quest-reward">+2 🎟</div>
+        </div>
+
+        <!-- Квест 3 -->
+        <div class="quest-item" onclick="startQuest('Канал В', 'sub')">
+            <div class="quest-info">
+                <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
+                <div class="quest-title">Раздача TON</div>
+            </div>
+            <div class="quest-reward">+1 🎟</div>
+        </div>
+
+        <!-- Квест 4 (для проверки скролла вниз) -->
+        <div class="quest-item" onclick="startQuest('Канал Г', 'sub')">
+            <div class="quest-info">
+                <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
+                <div class="quest-title">Мемы и Аниме</div>
+            </div>
+            <div class="quest-reward">+1 🎟</div>
+        </div>
+
     </div>
-<script>
-    function sendQuest(questName) {
-        // Добавим проверку, чтобы понять, видит ли скрипт Telegram
-        if (window.Telegram && window.Telegram.WebApp) {
-            let tg = window.Telegram.WebApp;
-            tg.sendData(questName);
-            alert("Отправляю: " + questName); // Убери это, когда заработает
-        } else {
-            alert("напиши @andrundik1 бурмалда");
+
+    <!-- Нижнее меню -->
+    <div class="tabbar">
+        <span class="tab-item" onclick="switchTab('home')">🏠</span>
+        <span class="tab-item" onclick="switchTab('wheel')">🎡</span>
+        <span class="tab-item" onclick="switchTab('cup')">🏆</span>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.ready();
+
+        function startQuest(questName, type) {
+            if (window.Telegram && window.Telegram.WebApp) {
+                tg.sendData('Квест: ' + questName);
+            }
+            alert('Выбран квест: ' + questName);
         }
-    }
-</script>
+
+        function switchTab(tab) {
+            alert('Переход на вкладку: ' + tab);
+        }
+    </script>
 </body>
 </html>
