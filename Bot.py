@@ -10,7 +10,7 @@ if not TOKEN:
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-CHANNEL_ID = "@your_channel_username" 
+CHANNEL_ID = "@NFTbyAndrundik" 
 user_tickets = {}
 
 # Приветствие с кнопкой Mini App
