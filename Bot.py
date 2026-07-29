@@ -13,7 +13,7 @@ bot.remove_webhook()
 
 app = Flask(__name__)
 
-CHANNEL_ID = "@your_channel_username" 
+CHANNEL_ID = "@NFTbyAndrundik" 
 user_tickets = {}
 
 HTML_PAGE = """
