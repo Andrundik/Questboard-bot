@@ -11,7 +11,7 @@ bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
 # Укажи точный юзернейм твоего канала, куда подписываются пользователи
-CHANNEL_ID = "@NFTbyAndtundik" 
+CHANNEL_ID = "@NFTbyAndrundik" 
 user_tickets = {}
 
 # HTML-код твоего приложения прямо внутри сервера, чтобы он никогда не терялся
