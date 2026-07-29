@@ -24,7 +24,6 @@
             margin-bottom: 15px;
         }
 
-        /* Блок билетов */
         .tickets-card {
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 12px;
@@ -34,7 +33,6 @@
             margin-bottom: 15px;
         }
 
-        /* Центральная зона (Колесо) */
         .wheel-container {
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
             height: 140px;
@@ -47,34 +45,6 @@
             opacity: 0.8;
         }
 
-        /* Кнопки улучшений */
-        .upgrades-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .upgrade-card {
-            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 12px;
-            border-radius: 14px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .upgrade-card div:first-child {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .upgrade-card div:last-child {
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        /* Заголовки разделов */
         .section-title {
             font-size: 15px;
             font-weight: bold;
@@ -82,17 +52,12 @@
             text-align: left;
         }
 
-        /* Секция квестов (вертикальный скролл) */
         .quests-container {
-            max-height: 220px;
-            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            padding-right: 4px;
         }
 
-        /* Карточка квеста */
         .quest-item {
             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 10px 12px;
@@ -101,7 +66,6 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            cursor: pointer;
         }
 
         .quest-info {
@@ -112,7 +76,6 @@
             overflow: hidden;
         }
 
-        /* Аватарки */
         .quest-avatar {
             width: 36px;
             height: 36px;
@@ -130,34 +93,21 @@
             text-overflow: ellipsis;
         }
 
-        .quest-reward {
+        /* Кнопка квеста, которая меняет состояние */
+        .quest-btn {
             background-color: var(--tg-theme-button-color, #ff6600);
             color: var(--tg-theme-button-text-color, #ffffff);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: bold;
+            border: none;
+            cursor: pointer;
             white-space: nowrap;
         }
 
-        /* Нижнее меню */
-        .tabbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            border-top: 1px solid rgba(128, 128, 128, 0.2);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .tab-item {
-            font-size: 22px;
-            cursor: pointer;
+        .quest-btn.checked {
+            background-color: #4caf50;
         }
     </style>
 </head>
@@ -165,84 +115,76 @@
 
     <h1>Quest Board</h1>
 
-    <!-- Баланс -->
     <div class="tickets-card">
         🎟 Билетов: <span id="tickets-count">0</span>
     </div>
 
-    <!-- Колесо -->
     <div class="wheel-container">
         🎡 Колесо фортуны
     </div>
 
-    <!-- Улучшения -->
-    <div class="upgrades-grid">
-        <div class="upgrade-card" onclick="buyUpgrade('Убрать рекламу')">
-            <div>Убрать рекламу</div>
-            <div>50 🪙</div>
-        </div>
-        <div class="upgrade-card" onclick="buyUpgrade('Быстрые крутки')">
-            <div>Быстрые крутки</div>
-            <div>25 🪙</div>
-        </div>
-    </div>
-
-    <!-- Квесты -->
     <div class="section-title">📌 Подписаться на каналы</div>
     <div class="quests-container">
-        <div class="quest-item" onclick="completeQuest('https://t.me/durov', 'Крипто Новости UA')">
+        <div class="quest-item" id="quest-1">
             <div class="quest-info">
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
-                <div class="quest-title">Крипто Новости UA</div>
+                <div class="quest-title">Канал Крипто Новости</div>
             </div>
-            <div class="quest-reward">+1 🎟</div>
+            <button class="quest-btn" id="btn-1" onclick="handleQuestClick('https://t.me/durov', 'btn-1')">Выполнить</button>
         </div>
-
-        <div class="quest-item" onclick="completeQuest('https://t.me/durov', 'Геймеры Telegram')">
-            <div class="quest-info">
-                <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
-                <div class="quest-title">Геймеры Telegram</div>
-            </div>
-            <div class="quest-reward">+2 🎟</div>
-        </div>
-
-        <div class="quest-item" onclick="completeQuest('https://t.me/durov', 'Раздача TON')">
-            <div class="quest-info">
-                <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
-                <div class="quest-title">Раздача TON</div>
-            </div>
-            <div class="quest-reward">+1 🎟</div>
-        </div>
-    </div>
-
-    <!-- Нижнее меню -->
-    <div class="tabbar">
-        <span class="tab-item" onclick="switchTab('home')">🏠</span>
-        <span class="tab-item" onclick="switchTab('wheel')">🎡</span>
-        <span class="tab-item" onclick="switchTab('cup')">🏆</span>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.ready();
 
-        function completeQuest(channelUrl, questName) {
-            if (window.Telegram && window.Telegram.WebApp) {
-                // Открываем канал для подписки
+        // Состояние квеста для каждого блока: 'subscribe' -> 'check' -> 'done'
+        let questState = 'subscribe'; 
+
+        function handleQuestClick(channelUrl, btnId) {
+            let btn = document.getElementById(btnId);
+
+            if (questState === 'subscribe') {
+                // 1. Шаг: Пользователь кликает "Выполнить" -> открывается канал, окно сворачивается/не закрывается
                 tg.openTelegramLink(channelUrl);
-                // Тихо отправляем боту сигнал на проверку подписки
-                tg.sendData('CHECK_SUB:' + questName);
-            } else {
-                window.open(channelUrl, '_blank');
+                
+                // Меняем кнопку на "Проверить"
+                questState = 'check';
+                btn.innerText = "Проверить";
+                btn.style.backgroundColor = "#2196F3"; // Синий цвет для проверки
+                
+            } else if (questState === 'check') {
+                // 2. Шаг: Пользователь вернулся и нажал "Проверить" -> делаем запрос к боту
+                btn.innerText = "Проверка...";
+                
+                fetch('/check_sub', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: tg.initDataUnsafe.user.id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Успех! Подписка подтверждена
+                        questState = 'done';
+                        btn.innerText = "Готово ✔";
+                        btn.classList.add('checked');
+                        btn.disabled = true;
+                        
+                        // Обновляем баланс на экране
+                        document.getElementById('tickets-count').innerText = data.tickets;
+                        tg.showAlert("🎉 Поздравляем! Вам начислен 1 билет.");
+                    } else {
+                        // Если еще не подписался
+                        btn.innerText = "Проверить";
+                        tg.showAlert("❌ Вы еще не подписались на канал!");
+                    }
+                })
+                .catch(error => {
+                    btn.innerText = "Проверить";
+                    tg.showAlert("⚠️ Ошибка соединения с сервером.");
+                });
             }
-        }
-
-        function buyUpgrade(name) {
-            console.log("Покупка: " + name);
-        }
-
-        function switchTab(tab) {
-            console.log("Вкладка: " + tab);
         }
     </script>
 </body>
