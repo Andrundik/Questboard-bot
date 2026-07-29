@@ -1,14 +1,20 @@
+import os
 import telebot
 from telebot import types
 
-# Твой токен бота
-TOKEN = "8612175069:AAG9QLEDHoHdYf5_vZEAkUHCkXDGq1y_JKU"
+# Безопасное получение токена из переменных окружения Render
+TOKEN = os.environ.get("BOT_TOKEN")
+
+# Защита от ошибок: если токен не добавлен на Render, бот скажет об этом в логах
+if not TOKEN:
+    raise ValueError("ОШИБКА: Токен бота не найден! Добавь BOT_TOKEN во вкладке Environment на Render.")
+
 bot = telebot.TeleBot(TOKEN)
 
 # ID или юзернейм канала (бот должен быть там администратором!)
-CHANNEL_ID = "@Questboardrobot" 
+CHANNEL_ID = "@NFTbyAndrundik" 
 
-# Словарь для хранения баланса билетов пользователей
+# Словарь для хранения баланса билетов пользователей (временно в памяти)
 user_tickets = {}
 
 @bot.message_handler(commands=['start'])
@@ -17,12 +23,13 @@ def start_message(message):
     
     # Создаем кнопку для открытия Mini App
     markup = types.InlineKeyboardMarkup()
+    # ВНИМАНИЕ: Замени ссылку ниже на актуальную ссылку твоего сайта на Render!
     web_app = types.WebAppInfo(url="ССЫЛКА_НА_ТВОЙ_САЙТ_НА_RENDER")
     markup.add(types.InlineKeyboardButton("🚀 Открыть Quest Board", web_app=web_app))
     
     bot.send_message(user_id, "Привет! Добро пожаловать в Quest Board. Выполняй квесты и получай билеты!", reply_markup=markup)
 
-# Обработка данных, прилетающих из Mini App без лишнего шума
+# Обработка данных, прилетающих из Mini App без закрытия приложения
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app_data(message):
     user_id = message.from_user.id
@@ -56,5 +63,5 @@ def handle_web_app_data(message):
             bot.send_message(user_id, "⚠️ Ошибка проверки подписки. Убедись, что бот назначен администратором в канале.")
 
 # Запуск бота
-print("Бот запущен...")
+print("Бот успешно запущен и готов к работе!")
 bot.infinity_polling()
