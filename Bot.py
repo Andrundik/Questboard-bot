@@ -1,67 +1,54 @@
 import os
+from flask import Flask, request, jsonify
 import telebot
 from telebot import types
 
-# Безопасное получение токена из переменных окружения Render
 TOKEN = os.environ.get("BOT_TOKEN")
-
-# Защита от ошибок: если токен не добавлен на Render, бот скажет об этом в логах
 if not TOKEN:
-    raise ValueError("ОШИБКА: Токен бота не найден! Добавь BOT_TOKEN во вкладке Environment на Render.")
+    raise ValueError("ОШИБКА: Токен бота не найден!")
 
 bot = telebot.TeleBot(TOKEN)
+app = Flask(__name__)
 
-# ID или юзернейм канала (бот должен быть там администратором!)
-CHANNEL_ID = "@NFTbyAndrundik" 
-
-# Словарь для хранения баланса билетов пользователей (временно в памяти)
+CHANNEL_ID = "@your_channel_username" 
 user_tickets = {}
 
+# Приветствие с кнопкой Mini App
 @bot.message_handler(commands=['start'])
 def start_message(message):
     user_id = message.chat.id
-    
-    # Создаем кнопку для открытия Mini App
     markup = types.InlineKeyboardMarkup()
-    # ВНИМАНИЕ: Замени ссылку ниже на актуальную ссылку твоего сайта на Render!
     web_app = types.WebAppInfo(url="https://questboard-bot-jffr.onrender.com")
     markup.add(types.InlineKeyboardButton("🚀 Открыть Quest Board", web_app=web_app))
-    
     bot.send_message(user_id, "Привет! Добро пожаловать в Quest Board. Выполняй квесты и получай билеты!", reply_markup=markup)
 
-# Обработка данных, прилетающих из Mini App без закрытия приложения
-@bot.message_handler(content_types=['web_app_data'])
-def handle_web_app_data(message):
-    user_id = message.from_user.id
-    data = message.web_app_data.data
+# API-эндпоинт, к которому стучится сайт для проверки подписки
+@app.route('/check_sub', methods=['POST'])
+def api_check_sub():
+    data = request.json
+    user_id = data.get('user_id')
     
-    # Проверяем запрос на выполнение квеста
-    if data.startswith("CHECK_SUB:"):
-        quest_name = data.split(":")[1]
-        
-        try:
-            # Проверяем статус подписки пользователя в канале
-            chat_member = bot.get_chat_member(CHANNEL_ID, user_id)
-            status = chat_member.status
-            
-            if status in ['member', 'administrator', 'creator']:
-                # Начисляем билет
-                if user_id not in user_tickets:
-                    user_tickets[user_id] = 0
-                user_tickets[user_id] += 1
-                
-                bot.send_message(
-                    user_id, 
-                    f"✅ Подписка на «{quest_name}» подтверждена!\n🎟 Тебе начислен 1 билет. Всего билетов: {user_tickets[user_id]}"
-                )
-            else:
-                bot.send_message(
-                    user_id, 
-                    f"❌ Ты еще не подписался на канал «{quest_name}». Подпишись и нажми на квест снова!"
-                )
-        except Exception as e:
-            bot.send_message(user_id, "⚠️ Ошибка проверки подписки. Убедись, что бот назначен администратором в канале.")
+    if not user_id:
+        return jsonify({"status": "error", "message": "No user_id"})
 
-# Запуск бота
-print("Бот успешно запущен и готов к работе!")
-bot.infinity_polling()
+    try:
+        chat_member = bot.get_chat_member(CHANNEL_ID, user_id)
+        if chat_member.status in ['member', 'administrator', 'creator']:
+            # Начисляем билет
+            if user_id not in user_tickets:
+                user_tickets[user_id] = 0
+            user_tickets[user_id] += 1
+            return jsonify({"status": "success", "tickets": user_tickets[user_id]})
+        else:
+            return jsonify({"status": "not_subscribed"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+# Запуск бота и сервера одновременно
+if __name__ == "__main__":
+    import threading
+    # Запускаем телеграм-бота в отдельном потоке
+    threading.Thread(target=lambda: bot.infinity_polling(), daemon=True).start()
+    # Запускаем Flask-сервер на порту, который требует Render (порт по умолчанию берется из окружения)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
