@@ -24,7 +24,7 @@ def start_message(message):
     # Создаем кнопку для открытия Mini App
     markup = types.InlineKeyboardMarkup()
     # ВНИМАНИЕ: Замени ссылку ниже на актуальную ссылку твоего сайта на Render!
-    web_app = types.WebAppInfo(url="https://questboard-bot-jffr.onrender.com")
+    web_app = types.WebAppInfo(url="https://questboard-bot-jffr.onrender.com"
     markup.add(types.InlineKeyboardButton("🚀 Открыть Quest Board", web_app=web_app))
     
     bot.send_message(user_id, "Привет! Добро пожаловать в Quest Board. Выполняй квесты и получай билеты!", reply_markup=markup)
