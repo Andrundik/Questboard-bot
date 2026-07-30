@@ -52,7 +52,7 @@ HTML_PAGE = """
                 <img src="https://via.placeholder.com/40" alt="avatar" class="quest-avatar">
                 <div class="quest-title">Твой канал</div>
             </div>
-            <button class="quest-btn" id="btn-1" onclick="handleQuestClick('https://t.me/durov', 'btn-1')">Выполнить</button>
+            <button class="quest-btn" id="btn-1" onclick="handleQuestClick('https://t.me/nftbyandrundik', 'btn-1')">Выполнить</button>
         </div>
     </div>
     <div class="tabbar">
