@@ -13,15 +13,13 @@ bot.remove_webhook()
 app = Flask(__name__)
 
 # ================= CONFIGURATION =================
-# 1. Впиши сюда Telegram ID администраторов через запятую (узнать свой ID можно у @userinfobot)
+# Впиши сюда свой Telegram ID (цифрами) вместо 123456789
 ADMIN_IDS = [5280210248] 
 
-# 2. Список квестов по умолчанию (id должен быть уникальным для каждого квеста)
-quests_db = [
-]
+# Начальные квесты (можно оставить пустыми: [])
+quests_db = []
 
-# База данных пользователей: хранит билеты и список ID выполненных квестов
-# Пример: { 987654321: { "tickets": 2, "completed_quests": ["q1"] } }
+# База данных пользователей: билеты и список выполненных квестов
 users_data = {}
 # =================================================
 
@@ -56,9 +54,7 @@ HTML_PAGE = """
     <div class="tickets-card">🎟 Билетов: <span id="tickets-count">0</span></div>
     <div class="wheel-container">🎡 Колесо фортуны</div>
     <div class="section-title">📌 Подписаться на каналы</div>
-    <div class="quests-container" id="quests-list">
-        <!-- Квесты подгружаются динамически -->
-    </div>
+    <div class="quests-container" id="quests-list"></div>
     <div class="tabbar">
         <span class="tab-item">🏠</span>
         <span class="tab-item">🎡</span>
@@ -68,8 +64,7 @@ HTML_PAGE = """
         let tg = window.Telegram.WebApp;
         tg.ready();
         const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
-
-        let activeStates = {}; // Сохраняет статусы кнопок для каждого квеста ('subscribe', 'check')
+        let activeStates = {};
 
         function loadQuests() {
             if (!userId) return;
@@ -122,7 +117,7 @@ HTML_PAGE = """
                 .then(data => {
                     if (data.status === 'success') {
                         tg.showAlert("🎉 Поздравляем! Квест выполнен, получен 1 билет.");
-                        loadQuests(); // Перезагружаем список, выполненный квест исчезнет
+                        loadQuests();
                     } else {
                         btn.innerText = "Проверить";
                         tg.showAlert("❌ Вы еще не подписались на канал!");
@@ -134,7 +129,6 @@ HTML_PAGE = """
                 });
             }
         }
-
         loadQuests();
     </script>
 </body>
@@ -145,7 +139,6 @@ HTML_PAGE = """
 def home():
     return render_template_string(HTML_PAGE)
 
-# Получение данных пользователя и списка невыполненных квестов
 @app.route('/get_user_data', methods=['GET'])
 def get_user_data():
     user_id = int(request.args.get('user_id', 0))
@@ -154,13 +147,10 @@ def get_user_data():
     
     user_info = users_data[user_id]
     completed = user_info["completed_quests"]
-    
-    # Фильтруем квесты: отдаем только те, которые пользователь ЕЩЕ НЕ выполнил
     available = [q for q in quests_db if q["id"] not in completed]
     
     return jsonify({"tickets": user_info["tickets"], "available_quests": available})
 
-# Проверка подписки и удаление квеста у пользователя
 @app.route('/check_sub', methods=['POST'])
 def api_check_sub():
     data = request.json
@@ -170,10 +160,9 @@ def api_check_sub():
     if not user_id or not quest_id:
         return jsonify({"status": "error"})
 
-    # Ищем квест в базе
     quest = next((q for q in quests_db if q["id"] == quest_id), None)
     if not quest:
-        return jsonify({"status": "error", "message": "Quest not found"})
+        return jsonify({"status": "error"})
 
     try:
         chat_member = bot.get_chat_member(quest["channel_id"], user_id)
@@ -181,7 +170,6 @@ def api_check_sub():
             if user_id not in users_data:
                 users_data[user_id] = {"tickets": 0, "completed_quests": []}
             
-            # Условие 1: Добавляем в выполненные (квест скрывается у этого пользователя)
             if quest_id not in users_data[user_id]["completed_quests"]:
                 users_data[user_id]["completed_quests"].append(quest_id)
                 users_data[user_id]["tickets"] += 1
@@ -192,16 +180,14 @@ def api_check_sub():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
-# --- ТЕЛЕГРАМ КОМАНДЫ ДЛЯ АДМИНА ---
-
 @bot.message_handler(commands=['start'])
 def start_message(message):
     markup = types.InlineKeyboardMarkup()
+    # Замени URL ниже на свой актуальный адрес приложения с Render
     web_app = types.WebAppInfo(url="https://questboard-bot-jffr.onrender.com")
     markup.add(types.InlineKeyboardButton("🚀 Открыть Quest Board", web_app=web_app))
     bot.send_message(message.chat.id, "Привет! Добро пожаловать в Quest Board. Выполняй квесты и получай билеты!", reply_markup=markup)
 
-# Добавление нового квеста
 @bot.message_handler(commands=['addquest'])
 def start_add_quest(message):
     if message.from_user.id not in ADMIN_IDS:
@@ -218,7 +204,6 @@ def save_new_quest(message):
             return
         
         title, url, channel_id = parts[0], parts[1], parts[2]
-        # Генерируем уникальный ID на основе названия
         quest_id = "q_" + str(len(quests_db) + 1) + "_" + str(abs(hash(title)) % 1000)
         
         quests_db.append({"id": quest_id, "title": title, "url": url, "channel_id": channel_id})
@@ -226,21 +211,20 @@ def save_new_quest(message):
     except Exception:
         bot.send_message(message.chat.id, "⚠️ Ошибка при добавлении.")
 
-# Условие 2: Обновление / Сброс квестов для всех пользователей без дублирования
 @bot.message_handler(commands=['resetquests'])
 def reset_quests_cmd(message):
     if message.from_user.id not in ADMIN_IDS:
         bot.send_message(message.chat.id, "❌ У вас нет прав.")
         return
     
-    # Очищаем историю выполненных квестов у всех игроков
     for user_id in users_data:
         users_data[user_id]["completed_quests"] = []
         
-    bot.send_message(message.chat.id, "🔄 Все квесты успешно сброшены! Теперь они снова видны у всех пользователей (без дублирования).")
+    bot.send_message(message.chat.id, "🔄 Все квесты успешно сброшены! Теперь они снова видны у всех пользователей.")
 
 if __name__ == "__main__":
     import threading
-    threading.Thread(target=lambda: bot.infinity_polling(none_stop=True, interval=0), daemon=True).large = True
+    # Исправлен запуск потока бота без лишних ошибок
+    threading.Thread(target=lambda: bot.infinity_polling(none_stop=True, interval=0), daemon=True).start()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
