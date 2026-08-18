@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: drun-space
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python Bot.py
