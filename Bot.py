@@ -125,17 +125,25 @@ if __name__ == "__main__":
     import time
     
     def run_bot():
+        print("Попытка инициализации бота...")
+        try:
+            bot.remove_webhook()
+            print("Webhook успешно удален.")
+        except Exception as e:
+            print(f"Ошибка при удалении webhook: {e}")
+
         while True:
             try:
-                bot.remove_webhook()
-                time.sleep(1)
-                print("Бот запущен и слушает сообщения...")
-                bot.infinity_polling(skip_pending=True)
+                print("Бот запущен и ожидает сообщения (infinity_polling)...")
+                bot.infinity_polling(skip_pending=True, interval=0.5, timeout=20)
             except Exception as e:
-                print(f"Ошибка в работе бота: {e}")
+                print(f"КРИТИЧЕСКАЯ ОШИБКА БОТА: {e}")
                 time.sleep(5)
 
+    # Запуск бота в фоне
     threading.Thread(target=run_bot, daemon=True).start()
     
+    # Запуск Flask
     port = int(os.environ.get("PORT", 5000))
+    print(тф"Запуск Flask сервера на порту {port}...")
     app.run(host="0.0.0.0", port=port)
