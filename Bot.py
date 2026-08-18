@@ -145,5 +145,5 @@ if __name__ == "__main__":
     
     # Запуск Flask
     port = int(os.environ.get("PORT", 5000))
-    print(тф"Запуск Flask сервера на порту {port}...")
+    print(f"Запуск Flask сервера на порту {port}...")
     app.run(host="0.0.0.0", port=port)
