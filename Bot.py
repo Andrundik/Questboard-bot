@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, render_template_string
 import telebot
 from telebot import types
 
-TOKEN = os.environ.get("BOT_TOKEN") # Проверь, как у тебя называется переменная окружения на Render: TOKEN или BOT_TOKEN!
+TOKEN = os.environ.get("TOKEN") # Проверь, как у тебя называется переменная окружения на Render: TOKEN или BOT_TOKEN!
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
