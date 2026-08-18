@@ -1,4 +1,4 @@
-import os, json
+import os, json, threading
 from flask import Flask, request, jsonify, render_template_string
 import telebot
 from telebot import types
@@ -127,18 +127,15 @@ if __name__ == "__main__":
     def run_bot():
         while True:
             try:
-                # Убираем старые webhook'и, если они висели, чтобы избежать конфликта 409
                 bot.remove_webhook()
                 time.sleep(1)
                 print("Бот запущен и слушает сообщения...")
                 bot.infinity_polling(skip_pending=True)
             except Exception as e:
                 print(f"Ошибка в работе бота: {e}")
-                time.sleep(5) # Пауза перед перезапуском, если пропала сеть или конфликт
+                time.sleep(5)
 
-    # Запускаем бота в отдельном потоке
     threading.Thread(target=run_bot, daemon=True).start()
     
-    # Запуск веб-сервера Flask
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
