@@ -9,7 +9,6 @@ app = Flask(__name__)
 
 DB_FILE = "database.json"
 
-# --- ИНИЦИАЛИЗАЦИЯ БАЗЫ ---
 def load_db():
     if os.path.exists(DB_FILE):
         try:
@@ -23,7 +22,7 @@ def save_db(data):
 db = load_db()
 ADMIN_IDS = [5280210248] 
 
-# --- HTML ШАБЛОН ---
+# --- HTML / FRONTEND С ВКЛАДКАМИ ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="ru">
@@ -33,44 +32,108 @@ HTML_PAGE = """
     <title>Quest Board</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); }
-        .quest-item { padding: 10px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
-        button { padding: 8px 15px; border-radius: 8px; border: none; background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); }
+        body { font-family: sans-serif; padding: 15px 15px 70px 15px; background: var(--tg-theme-bg-color, #ffffff); color: var(--tg-theme-text-color, #000000); margin: 0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .quest-item { background: var(--tg-theme-secondary-bg-color, #f1f1f1); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        button { padding: 8px 14px; border-radius: 8px; border: none; background: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #ffffff); font-weight: bold; cursor: pointer; }
+        .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--tg-theme-bg-color, #ffffff); border-top: 1px solid rgba(128,128,128,0.2); display: flex; justify-content: space-around; padding: 10px 0; }
+        .tab-btn { background: none; border: none; color: var(--tg-theme-hint-color, #999); font-size: 14px; cursor: pointer; font-weight: normal; }
+        .tab-btn.active { color: var(--tg-theme-button-color, #2481cc); font-weight: bold; }
+        .ticket-box { background: var(--tg-theme-secondary-bg-color, #f1f1f1); padding: 15px; border-radius: 12px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-    <h1>📋 Квесты</h1>
-    <div id="quests-list">Загрузка...</div>
+
+    <!-- Вкладка 1: Квесты -->
+    <div id="tab-quests" class="tab-content active">
+        <h2>📋 Квесты</h2>
+        <div class="ticket-box">🎟 Билетов: <span id="tickets-count">0</span></div>
+        <div id="quests-list">Загрузка...</div>
+    </div>
+
+    <!-- Вкладка 2: Рулетка -->
+    <div id="tab-wheel" class="tab-content">
+        <h2>🎡 Колесо Фортуны</h2>
+        <p style="text-align:center; margin-top: 40px; opacity: 0.6;">Скоро здесь появится рулетка!</p>
+    </div>
+
+    <!-- Вкладка 3: Профиль / Лидерборд -->
+    <div id="tab-profile" class="tab-content">
+        <h2>🏆 Профиль и Лидерборд</h2>
+        <p style="text-align:center; margin-top: 40px; opacity: 0.6;">Тут будет таблица лидеров.</p>
+    </div>
+
+    <!-- Нижнее меню (Таббар) -->
+    <div class="tabbar">
+        <button class="tab-btn active" onclick="switchTab('quests', this)">📋 Квесты</button>
+        <button class="tab-btn" onclick="switchTab('wheel', this)">🎡 Рулетка</button>
+        <button class="tab-btn" onclick="switchTab('profile', this)">🏆 Лидеры</button>
+    </div>
+
     <script>
         let tg = window.Telegram.WebApp;
         tg.ready();
-        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 12345;
 
-        function loadQuests() {
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function loadData() {
             fetch('/get_user_data?user_id=' + userId)
             .then(res => res.json())
             .then(data => {
+                document.getElementById('tickets-count').innerText = data.tickets;
                 let container = document.getElementById('quests-list');
-                container.innerHTML = data.available_quests.length === 0 ? "Все квесты выполнены! 🎉" : "";
+                
+                if (data.available_quests.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; opacity: 0.6; margin-top: 30px;">🎉 Новых квестов пока нет! Ждите от админа.</div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
                 data.available_quests.forEach(q => {
-                    container.innerHTML += `<div class='quest-item'>${q.title} <button onclick="check('${q.id}', '${q.url}')">Выполнить</button></div>`;
+                    container.innerHTML += `
+                        <div class='quest-item'>
+                            <span>${q.title}</span> 
+                            <button onclick="check('${q.id}', '${q.url}')">Выполнить</button>
+                        </div>`;
                 });
             });
         }
+
         function check(id, url) { 
             tg.openTelegramLink(url); 
             setTimeout(() => {
-                fetch('/check_sub', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: userId, quest_id: id})})
-                .then(() => loadQuests());
+                fetch('/check_sub', {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({user_id: userId, quest_id: id})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        tg.showAlert("✅ Квест выполнен! Получен 1 билет.");
+                        loadData();
+                    } else {
+                        tg.showAlert("❌ Вы еще не подписались на канал!");
+                    }
+                });
             }, 3000);
         }
-        loadQuests();
+
+        loadData();
     </script>
 </body>
 </html>
 """
 
-# --- БОТ ---
+# --- БОТ И АДМИНКА ---
 @bot.message_handler(commands=['admin'])
 def admin_menu(message):
     if message.from_user.id not in ADMIN_IDS: return
@@ -82,12 +145,12 @@ def admin_menu(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     if call.data == "add_q":
-        msg = bot.send_message(call.message.chat.id, "Введите: Название, Ссылка, @юзернейм")
+        msg = bot.send_message(call.message.chat.id, "Введите через запятую:\nНазвание, Ссылка, @юзернейм")
         bot.register_next_step_handler(msg, process_add)
     elif call.data == "reset_q":
         for uid in db["users"]: db["users"][uid]["completed_quests"] = []
         save_db(db)
-        bot.answer_callback_query(call.id, "Сброшено!")
+        bot.answer_callback_query(call.id, "Квесты сброшены у всех!")
 
 def process_add(message):
     try:
@@ -95,8 +158,16 @@ def process_add(message):
         q_id = f"q{len(db['quests'])+1}"
         db["quests"].append({"id": q_id, "title": parts[0], "url": parts[1], "channel_id": parts[2]})
         save_db(db)
-        bot.send_message(message.chat.id, "✅ Квест добавлен!")
+        bot.send_message(message.chat.id, "✅ Квест успешно добавлен!")
     except: bot.send_message(message.chat.id, "⚠️ Ошибка формата!")
+
+@bot.message_handler(commands=['start'])
+def start_message(message):
+    markup = types.InlineKeyboardMarkup()
+    # Ссылка на твой сайт в Render
+    web_app = types.WebAppInfo(url="https://drun-space.onrender.com") 
+    markup.add(types.InlineKeyboardButton("🚀 Открыть Quest Board", web_app=web_app))
+    bot.send_message(message.chat.id, "Привет! Открывай приложение и выполняй квесты:", reply_markup=markup)
 
 # --- СЕРВЕР ---
 @app.route('/')
@@ -114,36 +185,28 @@ def check():
     data = request.json
     uid, qid = str(data['user_id']), data['quest_id']
     try:
-        db["users"][uid]["completed_quests"].append(qid)
-        db["users"][uid]["tickets"] += 1
-        save_db(db)
-        return jsonify({"status": "success"})
+        quest = next((q for q in db["quests"] if q["id"] == qid), None)
+        member = bot.get_chat_member(quest["channel_id"], uid)
+        if member.status in ['member', 'administrator', 'creator']:
+            if qid not in db["users"][uid]["completed_quests"]:
+                db["users"][uid]["completed_quests"].append(qid)
+                db["users"][uid]["tickets"] += 1
+                save_db(db)
+            return jsonify({"status": "success"})
+        return jsonify({"status": "not_subscribed"})
     except: return jsonify({"status": "error"})
 
-# --- ЗАПУСК С АВТОВОССТАНОВЛЕНИЕМ ---
+# --- ЗАПУСК ---
 if __name__ == "__main__":
-    import time
-    
     def run_bot():
-        print("Попытка инициализации бота...")
-        try:
-            bot.remove_webhook()
-            print("Webhook успешно удален.")
-        except Exception as e:
-            print(f"Ошибка при удалении webhook: {e}")
-
         while True:
             try:
-                print("Бот запущен и ожидает сообщения (infinity_polling)...")
+                bot.remove_webhook()
+                time.sleep(1)
                 bot.infinity_polling(skip_pending=True, interval=0.5, timeout=20)
-            except Exception as e:
-                print(f"КРИТИЧЕСКАЯ ОШИБКА БОТА: {e}")
-                time.sleep(5)
+            except: time.sleep(5)
 
-    # Запуск бота в фоне
+    import time
     threading.Thread(target=run_bot, daemon=True).start()
-    
-    # Запуск Flask
     port = int(os.environ.get("PORT", 5000))
-    print(f"Запуск Flask сервера на порту {port}...")
     app.run(host="0.0.0.0", port=port)
